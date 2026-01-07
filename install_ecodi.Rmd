@@ -49,6 +49,60 @@ knitr::include_graphics("img/aws_crawler.png")
 ecoDI 패키지는 `sf` 패키지에 종속성이 있는데, 이 패키지는 지리정보 시스템 관련 유틸리티와 몇 개의 R 패키지를 필요로 합니다.
 이들을 설정하는 방법을 다룹니다.
 
+### gdal 설치
+
+`gdal` 유틸리티가 필요합니다. 다음처럼 `gdal`를 다운로드하여 설치합니다.
+
+#### 사전 준비
+
+먼저 시스템이 최신 버전인지 확인하고 필요한 빌드 도구와 종속성 있는 유틸리티를 설치합니다. 
+
+```bash
+sudo dnf update -y
+sudo dnf install -y gcc gcc-c++ make cmake curl python3 python3-devel
+# Install other required dependencies for GDAL, e.g., proj, geos, sqlite3, etc.
+sudo dnf install -y proj-devel geos-devel sqlite-devel pcre-devel libxml2-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel
+```
+
+#### 컴파일 단계
+
+1. 소스 코드 다운로드:
+
+```bash
+cd ~
+wget https://github.com/OSGeo/gdal/releases/download/v3.8.3/gdal-3.8.3.tar.gz
+```
+
+2. 압축 해제:
+
+```bash
+tar xvzf gdal-3.8.3.tar.gz
+cd gdal-3.8.3/
+```
+
+3. 구성 및 설치:
+
+```bash
+mkdir build
+cd build
+cmake .. # Or use specific flags, e.g., cmake -DGDAL_BUILD_OPTIONAL_DRIVERS=OFF ..
+make -j$(nproc)
+```
+
+4. 설치:
+
+```bash
+sudo make install
+```
+
+5. 설치 확인
+
+```bash
+sh-5.2$ gdalinfo --version
+GDAL 3.8.3, released 2024/01/04 (debug build)
+sh-5.2$
+```
+
 ### geos 설치
 
 `geos-config` 유틸리티가 필요합니다. 다음처럼 `geos`를 다운로드하여 설치합니자.
