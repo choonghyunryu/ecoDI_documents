@@ -1,0 +1,35 @@
+title: "데이터 수집과 활용을 위한 ecoDI"
+description: |
+  My Website
+output_dir: "docs"
+navbar:
+  logo:
+    image: img/dplanex_white_EN.png
+    href: https://www.dplanex.com/
+  right:
+    - text: "Introduce"
+      href: index.html
+    - text: "Implementation"
+      menu:
+        - text: "환경 설정"
+          href: environments.html        
+        - text: "ecoDI package 설치"
+          href: install_ecodi.html   
+        - text: "---"      
+        - text: "DBMS 설치"
+          href: install_mysql.html   
+        - text: "DBMS 환경 설정"
+          href: config_mysql.html             
+        - text: "---"      
+        - text: "Shiny Server 설치"
+          href: install_ecodi.html   
+        - text: "ecoDI Manager 설치"
+          href: install_ecodi.html          
+        - text: "---"
+        - text: "Resources"        
+          href: install_ecodi.html
+output:
+  distill::distill_article:
+    theme: theme.css
+    includes:
+      after_body: footer.html

@@ -1,0 +1,93 @@
+---
+title: "DBMS 서버 설치"
+description: |
+   **ecoDI 패키지와 ecoDI Manager**가 동작할 DBMS로서의, **MySQL 서버**를 설치하는 방법을 살펴봅니다.
+author:
+  - name: 유충현 
+    url: https://choonghyunryu.github.io/
+    affiliation: 디플래닉스 DS
+    affiliation_url: https://www.dplanex.com/
+date: "`r Sys.Date()`"
+output: 
+  distill::distill_article:
+    toc: true
+    toc_depth: 3  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      message = FALSE, 
+                      warning = FALSE, 
+                      collapse = FALSE,
+                      fig.align = "center",
+                      tidy.opts = list(width.cutoff = 70), 
+                      tidy = TRUE)
+knitr::opts_chunk$set(fig.width = 12, fig.height = 9)
+
+library(shiny, warn.conflicts = FALSE)
+library(dplyr, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
+
+xaringanExtra :: use_panelset()
+```
+
+
+```{r}
+#| intro, 
+#| echo=FALSE, 
+#| out.width = "45%"
+knitr::include_graphics("img/mysql.webp")
+```
+
+
+```{r, preface, echo=FALSE}
+div(class = "preface", 
+    h4("들어가기"),
+    "메타 데이터와 수집된 데이터를 저장할 DBMS가 필요합니다.", br(),
+    "이를 위한 DBMS, MySQL 서버를 AWS의 크롤링 서버에 설치합니다.")
+```
+
+<br>
+
+
+## MySQL 설치하기
+
+Amazon Linux 2023의 패키지 관리자는 `dnf`입니다. `dnf`를 이용하여 MySQL Server를 설치합니다.
+
+설치는 sudo 권한이 있는 사용자 계정으로 진행합니다.
+
+### 설치 시나리오
+
+1. 설치되어 있는 패키지들을 최신 버전으로 업데이트합니다.
+2. mysql80-community-release-el9-1.noarch.rpm 패키지를 설치합니다.
+3. RPM-GPG-KEY-mysql-2022 키를 가져와서 시스템에 추가합니다.
+4. mysql-community-devel 개발 라이브러리를 설치합니다.
+
+```{bash, eval=FALSE}
+# install system configuration updates for Amazon Linux
+sudo dnf -y update
+
+#-------------------------------------------------------------------------------
+# install mysql server for Amazon Linux 2023
+#-------------------------------------------------------------------------------
+sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm
+
+sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+sudo dnf update
+
+# install mysql devel for Amazon Linux 2023
+sudo dnf install -y mysql-community-devel
+```
+
+
+## MySQL 서버 시작하기
+
+`systemctl` 명령어를 이용하여 MySQL 서버를 시작합니다.
+
+```{bash, eval=FALSE}
+# start mysql server
+sudo systemctl start mysqld
+```
+
+
+
