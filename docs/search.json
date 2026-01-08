@@ -12,7 +12,7 @@
       ],
       "date": "`r Sys.Date()`",
       "contents": "\n\nContents\nMySQL 사용자 환경 설정하기\nMySQL 접속하기\n사용자 생성하기\nDB 스키마 생성하기\n\n\n\n\n\n\n\n들어가기\nDBMS 설치로 기초 준비는 되었지만, 사용 환경을 설정해야 합니다.\n사용자 계정을 생성하고 DB 스키마를 생성\n합니다.\n\n그리고 \necoDI 메타 테이블을 생성하고, 초기 데이터를 마이그레이션\n해야 기초 설정이 마무리됩니다.\n\n\n\nMySQL 사용자 환경 설정하기\nAmazon Linux 2023의 패키지 관리자는 dnf입니다. dnf를 이용하여 MySQL Server를 설치합니다.\nMySQL 접속하기\nroot 계정으로 mysql 명령어로 MySQL 서버에 접속합니다. 이때, --local-infile=1 옵션을 설정하여, 로컬 파일 임포트를 허용합니다.\n\nmysql -u root -p --local-infile=1\n\n사용자 생성하기\ncreate user 명령어로 ecodi 사용자를 생성합니다. 패스워드는 보안상 에스터리스크(*)로 표현하였습니다.\n\ncreate user 'ecodi'@'localhost' identified by '*******';\ngrant all privileges on *.* to 'ecodi'@'localhost';\nFLUSH PRIVILEGES;\n\nDB 스키마 생성하기\necodi_meta, ecodi_ods, ecodi_data 3개의 DB 스키마를 생성합니다. 각 스키마의 문자셋은 utf8mb3, 콜레이션은 utf8mb3_general_ci로 설정합니다.\n\nCREATE SCHEMA ecodi_meta DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci;\nCREATE SCHEMA ecodi_ods DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci;\nCREATE SCHEMA ecodi_data DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci;\n\n\n3개의 DB 스키마의 역할은 다음과 같습니다.\n\n\n\nFigure 1: ecoDI의 DB 스키마 구성\n\n\n\n\n\n\n",
-      "last_modified": "2026-01-07T19:19:50+09:00"
+      "last_modified": "2026-01-08T13:12:38+09:00"
     },
     {
       "path": "environments.html",
@@ -26,7 +26,7 @@
       ],
       "date": "`r Sys.Date()`",
       "contents": "\n\nContents\n설치 환경\nEC2\n운영체제 정보\n\nR 환경 설정\nR 설치\nR Studio Server설치\nR 패키지 설치\n사전 유틸리티 설치\nR 패키지 설치\n\n\n기타 유틸리티 설치\nChrome 설치\n\n\n설치 환경\nEC2\n본 패키지는 AWS EC2 크롤러 서버에 설치함을 전제로 설명합니다.\nAWS EC2 정보는 다음과 같습니다.:\n인스턴스명: prd-extdata-crawler-ec2-new\n인스턴스 ID: i-0fcad0ec03eff8831\n퍼블릭 IPv4 주소: 3.39.196.148\n\n\n\n\n\n운영체제 정보\n크롤러 서버의 운영체제는 Amazon Linux 2023입니다. 다음은 운영체제 정보입니다.\n\nsh-5.2$ cat /etc/os-release\nNAME=\"Amazon Linux\"\nVERSION=\"2023\"\nID=\"amzn\"\nID_LIKE=\"fedora\"\nVERSION_ID=\"2023\"\nPLATFORM_ID=\"platform:al2023\"\nPRETTY_NAME=\"Amazon Linux 2023.3.20240304\"\nANSI_COLOR=\"0;33\"\nCPE_NAME=\"cpe:2.3:o:amazon:amazon_linux:2023\"\nHOME_URL=\"https://aws.amazon.com/linux/amazon-linux-2023/\"\nDOCUMENTATION_URL=\"https://docs.aws.amazon.com/linux/\"\nSUPPORT_URL=\"https://aws.amazon.com/premiumsupport/\"\nBUG_REPORT_URL=\"https://github.com/amazonlinux/amazon-linux-2023\"\nVENDOR_NAME=\"AWS\"\nVENDOR_URL=\"https://aws.amazon.com/\"\nSUPPORT_END=\"2028-03-15\"\n\nR 환경 설정\nR 설치\ndnf 패키지 관리자를 이용해서 R을 설치합니다.\n\nsudo dnf install -y R\n\nR Studio Server설치\n크롤링 서버에 R Studio Server를 설치합니다.\nR Studio Server는 openssl을 사용하므로 OpenSSL 1.1.1 버전을 별도로 설치합니다.\n\nwget https://download2.rstudio.org/server/rhel8/x86_64/rstudio-server-rhel-2025.05.0-496-x86_64.rpm\nsudo dnf install rstudio-server-rhel-2025.05.0-496-x86_64.rpm\n\nsudo dnf install -y wget perl unzip gcc zlib-devel\nmkdir /tmp/openssl\ncd /tmp/openssl\nwget https://www.openssl.org/source/openssl-1.1.1s.tar.gz\ntar xzvf openssl-1.1.1s.tar.gz\ncd openssl-1.1.1s\n./config --prefix=/usr/local/openssl11 --openssldir=/usr/local/openssl11 shared zlib\nmake\nsudo make install\n\nsudo bash -c \"echo /usr/local/openssl11/lib/ >> /etc/ld.so.conf\"\nsudo ldconfig\n\nR 패키지 설치\n사전 유틸리티 설치\nsudo yum install libcurl-devel.x86_64\nsudo yum install openssl-devel.x86_64\nsudo yum install fribidi-devel.x86_64\nsudo yum install freetype-devel libpng-devel libtiff-devel libjpeg-devel\n\nsudo ln -s /usr/lib64/libssl.so.3.0.8 /usr/lib64/libssl.so.1.1 \nsudo ln -s /usr/lib64/libcrypto.so.3.0.8 /usr/lib64/libcrypto.so.1.1  \nR 패키지 설치\n# from CRAN --------------------------------------------------------------------\npkgs <- c(\"tidyverse\", \"readxl\", \"devtools\", \"formattable\", \"archive\", \"RCurl\", \n          \"RMySQL\", \"R.utils\", \"shinyWidgets\", \"shinydashboard\",\n          \"shinydashboardPlus\", \"shinybusy\", \"colourpicker\", \"htmltools\", \n          \"flextable\", \"openxlsx\", \"ggridges\")\n\ninstall_if_missing <- function(pkg) {\n  if (!requireNamespace(pkg, quietly = TRUE)) {\n    install.packages(pkg)\n  }\n}\ninvisible(lapply(pkgs, install_if_missing))\n\n# from GitHub ------------------------------------------------------------------\ndevtools::install_github(\"choonghyunryu/koscrap\")\ndevtools::install_github(\"choonghyunryu/dpxReport\")\n기타 유틸리티 설치\nChrome 설치\nPageJS 기반 보고서 자동화 기능이 있는 패키지를 설치하기 위해서 Chrome 브라우저를 설치합니다. dlookr 패키지가 여기에 해당합니다.\nwget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm\nsudo dnf install ./google-chrome-stable_current_x86_64.rpm\ngoogle-chrome --version\n\n\n\n",
-      "last_modified": "2026-01-07T19:19:50+09:00"
+      "last_modified": "2026-01-08T13:12:38+09:00"
     },
     {
       "path": "index.html",
@@ -40,7 +40,21 @@
       ],
       "date": "2026-01-05",
       "contents": "\n\nContents\n설치하기\n생태계를 논하다\n데이터 생태계\n“ecoDI란 무엇인가요?”\necoDI 기능\n\n\n설치하기\necoDI 패키지는 GitHub으로부터 다음과 같이 설치합니다.\n# install.packages(\"devtools\")\ndevtools::install_github(\"choonghyunryu/ecoDI\")\n생태계를 논하다\n생물(식물, 동물, 미생물 등)과 비생물적 환경(공기, 물, 온도, 햇빛 등)이 서로 영향을 주고받으며 상호작용하는 역동적인 복합체\n\n\n\nFigure 1: 자연의 생태계\n\n\n\n데이터 생태계\n데이터를 생성, 관리, 저장, 분석 및 공유하는 데 관련된 모든 요소와 그들 간의 상호작용을 포괄하는 시스템\n\n\n\nFigure 2: 데이터 생태계\n\n\n\n“ecoDI란 무엇인가요?”\n데이터 생성(수집), 관리, 저장, 분석, 공유 기능을 제공하여 DI를 지원하는 생태계를 지향하는 솔루션\n\n\n\nFigure 3: ecoDI란 무엇인가요?\n\n\n\necoDI 기능\n데이터를 생성, 관리, 저장, 분석 및 공유하는 기능 정의 및 기본 기능의 점차적 구현\n\n\n\nFigure 4: ecoDI 기능\n\n\n\n\n\n\n",
-      "last_modified": "2026-01-07T19:19:51+09:00"
+      "last_modified": "2026-01-08T13:12:39+09:00"
+    },
+    {
+      "path": "install_ecodi_manager.html",
+      "title": "ecoDI Manager 설치",
+      "description": "**ecoDI Manager**는 Shiny Server에서 동작하는 **Shiny 앱**입니다. 이 페이지에서는 **ecoDI Manager 앱을 설치하는 방법**을 다룹니다..\n",
+      "author": [
+        {
+          "name": "유충현",
+          "url": "https://choonghyunryu.github.io/"
+        }
+      ],
+      "date": "`r Sys.Date()`",
+      "contents": "\n\nContents\necoDI Manager 구조\necoDI Manager 다운로드\necoDI Manager 설치하기\necoDI Manager 실행하기\n\n\n\n\n\n\n들어가기\nShiny Server 환경이 구성되었다구요?\n\n이제는 ecoDI Manager를 설치할 차례입니다.\n\n\n\necoDI Manager 구조\necoDI Manager는 shiny 애플리케이션으로 구성되어 있습니다.\n2025-02-08 기준으로 애플리케이션은 다음과 같은 구조로 되어 있습니다.\nsh-5.2$ tree ecoDI_manager/\necoDI_manager/\n├── LICENSE\n├── R\n│   ├── data.R\n│   ├── display.R\n│   ├── html_css.R\n│   └── html_tag.R\n├── README.md\n├── ecoDI_manager.Rproj\n├── global.R\n├── logo_kandle.png\n├── menu\n│   ├── data_ui.R\n│   ├── kosis_ui.R\n│   └── manage_ui.R\n├── modules\n│   └── 01_meta_system.R\n├── server.R\n└── ui.R\n\n3 directories, 17 files\nsh-5.2$\necoDI Manager 다운로드\necoDI Manager는 다음과 같은 github private repository에 호스팅되어 있습니다.\nhttps://github.com/choonghyunryu/ecoDI_manager\n이 저장소를 클론(clone)합니다.\ngit clone https://github.com/choonghyunryu/ecoDI_manager.git\necoDI Manager 설치하기\n단지 해팡 파일을 Shiny Server 디렉토리로 복사하는 것으로 설치가 마무리 됩니다.\nsudo cp -rf ~/ecoDI_manager /srv/shiny-server/\necoDI Manager 실행하기\n이미 Shiny Server가 구동 중이라면, 웹 브라우저에서 다음 URL로 접속합니다.\nhttp://<서버 IP 주소>:3838/ecoDI_manager/\nAWS 크롤링서버의 퍼블릭 IP 주소를 확인한 후, 웹 브라우저에서 다음 URL로 접속합니다.\nhttp://3.39.196.148:3838/ecoDI_manager/\n\n\n\n",
+      "last_modified": "2026-01-08T13:12:39+09:00"
     },
     {
       "path": "install_ecodi.html",
@@ -54,7 +68,7 @@
       ],
       "date": "`r Sys.Date()`",
       "contents": "\n\nContents\n설치 환경\necoDI 패키지 설치\n지리정보를 위한 설정\ngdal 설치\ngeos 설치\nudunits2 설치\nR 패키지 설치\n\nGit 설정 및 ecoDI 패키지 클론\necoDI 패키지 설치\n지도 시각화 패키지 설치\n\n\n설치 환경\n본 패키지는 AWS EC2 크롤러 서버에 설치함을 전제로 설명합니다.\nAWS EC2 정보는 다음과 같습니다.:\n인스턴스명: prd-extdata-crawler-ec2-new\n인스턴스 ID: i-0fcad0ec03eff8831\n퍼블릭 IPv4 주소: 3.39.196.148\n\n\n\n\n\necoDI 패키지 설치\n환경 설정 페이지의 리소스를 사전에 설치하였다는 것을 전제로 합니다.\n만약 이를 수행하지 않았다면, 설정 페이지를 참고하여 사전 설정을 완료하시기 바랍니다.\n지리정보를 위한 설정\necoDI 패키지는 sf 패키지에 종속성이 있는데, 이 패키지는 지리정보 시스템 관련 유틸리티와 몇 개의 R 패키지를 필요로 합니다.\n이들을 설정하는 방법을 다룹니다.\ngdal 설치\ngdal 유틸리티가 필요합니다. 다음처럼 gdal를 다운로드하여 설치합니다.\n사전 준비\n먼저 시스템이 최신 버전인지 확인하고 필요한 빌드 도구와 종속성 있는 유틸리티를 설치합니다.\nsudo dnf update -y\nsudo dnf install -y gcc gcc-c++ make cmake curl python3 python3-devel\n# Install other required dependencies for GDAL, e.g., proj, geos, sqlite3, etc.\nsudo dnf install -y proj-devel geos-devel sqlite-devel pcre-devel libxml2-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel\n컴파일 단계\n소스 코드 다운로드:\ncd ~\nwget https://github.com/OSGeo/gdal/releases/download/v3.8.3/gdal-3.8.3.tar.gz\n압축 해제:\ntar xvzf gdal-3.8.3.tar.gz\ncd gdal-3.8.3/\n구성 및 설치:\nmkdir build\ncd build\ncmake .. # Or use specific flags, e.g., cmake -DGDAL_BUILD_OPTIONAL_DRIVERS=OFF ..\nmake -j$(nproc)\n설치:\nsudo make install\n설치 확인\nsh-5.2$ gdalinfo --version\nGDAL 3.8.3, released 2024/01/04 (debug build)\nsh-5.2$\ngeos 설치\ngeos-config 유틸리티가 필요합니다. 다음처럼 geos를 다운로드하여 설치합니자.\nwget https://download.osgeo.org/geos/geos-3.12.3.tar.bz2\ntar -xvf geos-3.12.3.tar.bz2\ncd geos-3.12.3\n\n./configure --prefix=/usr/local/geos\nmake\nsudo make install\n\nsudo ln -s /usr/local/geos/bin/geos-config /usr/local/bin/geos-config\nudunits2 설치\nudunits2 유틸리티가 필요합니다. 다음처럼 udunits2를 다운로드하여 설치합니다.\n이 유틸리티는 units 패키지 설치에 필요합니다.\n\nhttps://gist.github.com/MichaelChirico/fb697a2be62f4c7b9cffbc2316494b2e 사이트를 참고했습니다.\n\nwget https://downloads.unidata.ucar.edu/udunits/udunits-2.2.28.tar.gz\ntar -xvzf udunits-2.2.28.tar.gz\ncd udunits-2.2.28\n\n./configure CFLAGS=\"-fno-exceptions\" --prefix=/usr/local \nmake\nsudo make install\nsudo ldconfig\n\nexport UDUNITS_ROOT=/usr/local\nexport LD_LIBRARY_PATH=$UDUNITS_ROOT/lib:$LD_LIBRARY_PATH\nR 패키지 설치\n관련된 몇 개의 R 패키지를 설치합니다.\nunits 패키지 설치\nunits 패키지를 설치합니다. shell에서 다음과 같이 실행합니다.\ngit clone https://github.com/r-quantities/units.git\ncd units\n\nR CMD INSTALL . --configure-args=\"--with-udunits2-include=$UDUNITS_ROOT/include --with-udunits2-lib=$UDUNITS_ROOT/lib\"\nsf 패키지 설치\n다음처럼 R 콘솔에서 sf 패키지를 설치합니다.\ninstall.packages(\"sf\")\nGit 설정 및 ecoDI 패키지 클론\necoDI 패키지는 GitHub 저장소로부터 클론합니다. 이를 위해 Git 사용자 정보를 설정합니다.\ngit config --global user.name \"Choonghyun Ryu\"\ngit config --global user.email \"choonghyun.ryu@gmail.com\"\n\ngit clone https://github.com/choonghyunryu/ecoDI.git ecoDI\necoDI 패키지 설치\necoDI 패키지는 로컬 소스 파일로부터 다음과 같이 설치합니다.\ninstall.packages(\"~/ecoDI\", repos = NULL, type = \"source\")\n지도 시각화 패키지 설치\necoDI 패키지는 bitSpatial 패키지를 필요로 하지 않지만, 향후 수집한 지역 기반의 데이터 시각화를 위해 bitSpatial 패키지를 설치합니다.\ndevtools::install_github(\"bit2r/bitSpatial\")\n\n\n\n",
-      "last_modified": "2026-01-08T08:38:57+09:00"
+      "last_modified": "2026-01-08T13:12:39+09:00"
     },
     {
       "path": "install_mysql.html",
@@ -68,7 +82,21 @@
       ],
       "date": "`r Sys.Date()`",
       "contents": "\n\nContents\nMySQL 설치하기\n설치 시나리오\n\nMySQL 서버 시작하기\n\n\n\n\n\n\n들어가기\n메타 데이터와 수집된 데이터를 저장할 DBMS가 필요합니다.\n\n이를 위한 DBMS, MySQL 서버를 AWS의 크롤링 서버에 설치합니다.\n\n\n\nMySQL 설치하기\nAmazon Linux 2023의 패키지 관리자는 dnf입니다. dnf를 이용하여 MySQL Server를 설치합니다.\n설치는 sudo 권한이 있는 사용자 계정으로 진행합니다.\n설치 시나리오\n설치되어 있는 패키지들을 최신 버전으로 업데이트합니다.\nmysql80-community-release-el9-1.noarch.rpm 패키지를 설치합니다.\nRPM-GPG-KEY-mysql-2022 키를 가져와서 시스템에 추가합니다.\nmysql-community-devel 개발 라이브러리를 설치합니다.\n\n# install system configuration updates for Amazon Linux\nsudo dnf -y update\n\n#-------------------------------------------------------------------------------\n# install mysql server for Amazon Linux 2023\n#-------------------------------------------------------------------------------\nsudo dnf install https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm\n\nsudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022\nsudo dnf update\n\n# install mysql devel for Amazon Linux 2023\nsudo dnf install -y mysql-community-devel\n\nMySQL 서버 시작하기\nsystemctl 명령어를 이용하여 MySQL 서버를 시작합니다.\n\n# start mysql server\nsudo systemctl start mysqld\n\n\n\n\n",
-      "last_modified": "2026-01-07T19:19:51+09:00"
+      "last_modified": "2026-01-08T13:12:40+09:00"
+    },
+    {
+      "path": "install_shinyserver.html",
+      "title": "Shiny Server 설치",
+      "description": "**ecoDI Manager**는 **Shiny Server에서 동작**합니다. 여기서는 **AWS의 크롤링 서버에 Shiny Server를 설치하는 방법**을 살펴봅니다.\n",
+      "author": [
+        {
+          "name": "유충현",
+          "url": "https://choonghyunryu.github.io/"
+        }
+      ],
+      "date": "`r Sys.Date()`",
+      "contents": "\n\nContents\nShiny Server 설치하기\nShiny Server 구동하기\n환경설정하기\n\n관련 라이브러리 설치하기\n\n\n\n\n\n\n들어가기\nR 환경이 구성되었다구요?\n\n이제는 웹 어플리케이션을 구축할 수 있는 Shiny Server를 설치할 차례입니다.\n\n\n\nShiny Server 설치하기\n#-------------------------------------------------------------------------------\n# install shiny server for Amazon Linux 2023\n#-------------------------------------------------------------------------------\nwget https://download3.rstudio.org/centos8/x86_64/shiny-server-1.5.23.1030-x86_64.rpm\nsudo dnf install --nogpgcheck shiny-server-1.5.23.1030-x86_64.rpm\nShiny Server 구동하기\n환경설정하기\nShiny Server의 환경설정 파일을 열어봅니다.\nsh-5.2$ cat /etc/shiny-server/shiny-server.conf\n# Instruct Shiny Server to run applications as the user \"shiny\"\nrun_as choonghyun.ryu shiny;\n\n# Define a server that listens on port 3838\nserver {\n  listen 3838;\n\n  # Define a location at the base URL\n  location / {\n\n    # Host the directory of Shiny Apps stored in this directory\n    site_dir /srv/shiny-server;\n\n    # Log all Shiny output to files in this directory\n    log_dir /var/log/shiny-server;\n\n    # When a user visits the base URL rather than a particular application,\n    # an index of the applications available in this directory will be shown.\n    directory_index on;\n  }\n}\nsh-5.2$\n기본 설정은 다음과 같습니다.:\nShiny Server는 포트 3838에서 리스닝합니다.\nShiny 애플리케이션은 /srv/shiny-server 디렉토리에 저장됩니다.\n로그 파일은 /var/log/shiny-server 디렉토리에 기록됩니다.\n기본 URL에 접속하면 애플리케이션 목록이 표시됩니다.\n만약에 환경 설정을 변경하였다면 다음 명령어로 서버를 재구동합니다.\nsudo systemctl restart shiny-server\n관련 라이브러리 설치하기\nShiny Server는 이미지 생성을 위한 cairo 개발 라이브러리가 필요합니다.\nsudo dnf install cairo-devel -y\n\n\n\n",
+      "last_modified": "2026-01-08T13:12:40+09:00"
     }
   ],
   "collections": []

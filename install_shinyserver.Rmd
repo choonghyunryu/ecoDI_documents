@@ -1,0 +1,114 @@
+---
+title: "Shiny Server 설치"
+description: |
+   **ecoDI Manager**는 **Shiny Server에서 동작**합니다. 여기서는 **AWS의 크롤링 서버에 Shiny Server를 설치하는 방법**을 살펴봅니다.
+author:
+  - name: 유충현 
+    url: https://choonghyunryu.github.io/
+    affiliation: 디플래닉스 DS
+    affiliation_url: https://www.dplanex.com/
+date: "`r Sys.Date()`"
+output: 
+  distill::distill_article:
+    toc: true
+    toc_depth: 3  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      message = FALSE, 
+                      warning = FALSE, 
+                      collapse = FALSE,
+                      fig.align = "center",
+                      tidy.opts = list(width.cutoff = 70), 
+                      tidy = TRUE)
+knitr::opts_chunk$set(fig.width = 12, fig.height = 9)
+
+library(shiny, warn.conflicts = FALSE)
+library(dplyr, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
+
+xaringanExtra :: use_panelset()
+```
+
+
+```{r}
+#| intro, 
+#| echo=FALSE, 
+#| out.width = "45%"
+knitr::include_graphics("img/shiny_server.jpg")
+```
+
+
+```{r, preface, echo=FALSE}
+div(class = "preface", 
+    h4("들어가기"),
+    "R 환경이 구성되었다구요?", br(),
+    "이제는 웹 어플리케이션을 구축할 수 있는 Shiny Server를 설치할 차례입니다.")
+```
+
+<br>
+
+
+## Shiny Server 설치하기
+
+```bash
+#-------------------------------------------------------------------------------
+# install shiny server for Amazon Linux 2023
+#-------------------------------------------------------------------------------
+wget https://download3.rstudio.org/centos8/x86_64/shiny-server-1.5.23.1030-x86_64.rpm
+sudo dnf install --nogpgcheck shiny-server-1.5.23.1030-x86_64.rpm
+```
+
+## Shiny Server 구동하기
+
+### 환경설정하기
+
+Shiny Server의 환경설정 파일을 열어봅니다.
+
+```bash
+sh-5.2$ cat /etc/shiny-server/shiny-server.conf
+# Instruct Shiny Server to run applications as the user "shiny"
+run_as choonghyun.ryu shiny;
+
+# Define a server that listens on port 3838
+server {
+  listen 3838;
+
+  # Define a location at the base URL
+  location / {
+
+    # Host the directory of Shiny Apps stored in this directory
+    site_dir /srv/shiny-server;
+
+    # Log all Shiny output to files in this directory
+    log_dir /var/log/shiny-server;
+
+    # When a user visits the base URL rather than a particular application,
+    # an index of the applications available in this directory will be shown.
+    directory_index on;
+  }
+}
+sh-5.2$
+```
+
+기본 설정은 다음과 같습니다.:
+
+- Shiny Server는 포트 3838에서 리스닝합니다.
+- Shiny 애플리케이션은 `/srv/shiny-server` 디렉토리에 저장됩니다.
+- 로그 파일은 `/var/log/shiny-server` 디렉토리에 기록됩니다.
+- 기본 URL에 접속하면 애플리케이션 목록이 표시됩니다.
+
+만약에 환경 설정을 변경하였다면 다음 명령어로 서버를 재구동합니다.
+
+```bash
+sudo systemctl restart shiny-server
+```
+
+## 관련 라이브러리 설치하기
+
+Shiny Server는 이미지 생성을 위한 cairo 개발 라이브러리가 필요합니다.
+
+```bash
+sudo dnf install cairo-devel -y
+```

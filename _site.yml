@@ -22,9 +22,9 @@ navbar:
           href: config_mysql.html             
         - text: "---"      
         - text: "Shiny Server 설치"
-          href: install_ecodi.html   
+          href: install_shinyserver.html   
         - text: "ecoDI Manager 설치"
-          href: install_ecodi.html          
+          href: install_ecodi_manager.html          
         - text: "---"
         - text: "Resources"        
           href: install_ecodi.html
