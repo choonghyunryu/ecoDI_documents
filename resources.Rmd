@@ -1,0 +1,24 @@
+---
+title: "Resources"
+description: |
+  관련 리소스 모음입니다.
+site: distill::distill_website
+output:
+  distill::distill_article:
+    toc: true
+    toc_depth: 3  
+author:
+  - name: 유충현 
+    url: https://choonghyunryu.github.io/
+    affiliation: 디플래닉스 DS
+    affiliation_url: https://www.dplanex.com/    
+date: "`r Sys.Date()`"  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+# TO-DO
+

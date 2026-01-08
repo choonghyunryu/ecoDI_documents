@@ -27,7 +27,7 @@ navbar:
           href: install_ecodi_manager.html          
         - text: "---"
         - text: "Resources"        
-          href: install_ecodi.html
+          href: resources.html
 output:
   distill::distill_article:
     theme: theme.css
