@@ -2734,6 +2734,13 @@ Implementation
 <li><a href="#사용자-생성하기" id="toc-사용자-생성하기">사용자 생성하기</a></li>
 <li><a href="#db-스키마-생성하기" id="toc-db-스키마-생성하기">DB 스키마 생성하기</a></li>
 </ul></li>
+<li><a href="#사전-준비하기" id="toc-사전-준비하기">사전 준비하기</a>
+<ul>
+<li><a href="#메타-테이블-export" id="toc-메타-테이블-export">메타 테이블 export</a></li>
+<li><a href="#export-파일-전송" id="toc-export-파일-전송">export 파일 전송</a></li>
+<li><a href="#파일-압축-풀기" id="toc-파일-압축-풀기">파일 압축 풀기</a></li>
+<li><a href="#마이그레이션-import" id="toc-마이그레이션-import">마이그레이션 import</a></li>
+</ul></li>
 </ul>
 </nav>
 </div>
@@ -2785,7 +2792,112 @@ Figure 1: ecoDI의 DB 스키마 구성
 </p>
 </div>
 </div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<h2 id="사전-준비하기">사전 준비하기</h2>
+<p>ecoDI 패키지와 ecoDI Manager가 동작하기 위해서는 메타 테이블과 초기 데이터가 필요합니다.</p>
+<p>기존에는 개인 Macbook 장비에서 개발하였고, 과정에서 DBMS 테이블에 집적한 데이터를 이식 환경에 마이그레이션해야 합니다.</p>
+<p>마이그레이션할 테이블을 export하여 파일로 준비하는 작업을 다음과 같이 수행하였습니다.</p>
+<h3 id="메타-테이블-export">메타 테이블 export</h3>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># export tables using mysqldump</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> ~/sql_migration</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_indctr <span class="op">&gt;</span> ~/sql_migration/mt_kosis_indctr.sql</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_indexpl <span class="op">&gt;</span> ~/sql_migration/mt_kosis_indexpl.sql</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_indlist <span class="op">&gt;</span> ~/sql_migration/mt_kosis_indlist.sql</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_itm <span class="op">&gt;</span> ~/sql_migration/mt_kosis_itm.sql</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_org <span class="op">&gt;</span> ~/sql_migration/mt_kosis_org.sql</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_prd <span class="op">&gt;</span> ~/sql_migration/mt_kosis_prd.sql</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_prdse <span class="op">&gt;</span> ~/sql_migration/mt_kosis_prdse.sql</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_src <span class="op">&gt;</span> ~/sql_migration/mt_kosis_src.sql</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_stat <span class="op">&gt;</span> ~/sql_migration/mt_kosis_stat.sql</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_statexpl <span class="op">&gt;</span> ~/sql_migration/mt_kosis_statexpl.sql</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_kosis_tbl <span class="op">&gt;</span> ~/sql_migration/mt_kosis_tbl.sql</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_log_dataimp <span class="op">&gt;</span> ~/sql_migration/mt_log_dataimp.sql</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_log_manage <span class="op">&gt;</span> ~/sql_migration/mt_log_manage.sql</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="ex">mysqldump</span> <span class="at">-h</span> localhost <span class="at">-uroot</span> <span class="at">-p</span> ecodi_meta mt_schema_list <span class="op">&gt;</span> ~/sql_migration/mt_schema_list.sql</span></code></pre></div>
+</div>
+<p>export된 파일의 용량이 제법 큽니다. 다음은 각 SQL 파일의 용량을 확인한 결과입니다.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">choonghyunryu@yuchunghyeon-ui-MacBookPro</span> sql_migration % du <span class="at">-h</span> <span class="pp">*</span>.sql    </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">236K</span>    mt_kosis_indctr.sql</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">440K</span>    mt_kosis_indexpl.sql</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a> <span class="ex">12K</span>    mt_kosis_indlist.sql</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">2.8G</span>    mt_kosis_itm.sql</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">116K</span>    mt_kosis_org.sql</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a> <span class="ex">23M</span>    mt_kosis_prd.sql</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">4.0K</span>    mt_kosis_prdse.sql</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a> <span class="ex">47M</span>    mt_kosis_src.sql</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a> <span class="ex">80M</span>    mt_kosis_stat.sql</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ex">4.9M</span>    mt_kosis_statexpl.sql</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a> <span class="ex">32M</span>    mt_kosis_tbl.sql</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="ex">292M</span>    mt_log_dataimp.sql</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="ex">881M</span>    mt_log_manage.sql</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="ex">4.0K</span>    mt_schema_list.sql</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">choonghyunryu@yuchunghyeon-ui-MacBookPro</span> sql_migration % </span></code></pre></div>
+<p>이 파일들을 크롤링 서버로 전송해야 합니다. 하지만 파일 용량이 너무 커서 다음 스크립트 compress.sh로 압축을 합니다.</p>
+<p>압축 효율이 높은 xz로 압축하며, 압축 레벨도 9로 최대로 설정합니다.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">choonghyunryu@yuchunghyeon-ui-MacBookPro</span> sql_migration % cat compress.sh</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="va">flist</span><span class="op">=</span><span class="kw">`</span><span class="fu">ls</span> <span class="pp">*</span>.sql<span class="kw">`</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> fname <span class="kw">in</span> <span class="va">$flist</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tar</span> <span class="at">-cvf</span> <span class="st">&quot;</span><span class="va">${fname}</span><span class="st">.tar&quot;</span> <span class="st">&quot;</span><span class="va">$fname</span><span class="st">&quot;</span> </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xz</span> <span class="at">-9</span> <span class="st">&quot;</span><span class="va">${fname}</span><span class="st">.tar&quot;</span> </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Compressed {</span><span class="va">$fname</span><span class="st">}&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">choonghyunryu@yuchunghyeon-ui-MacBookPro</span> sql_migration % </span></code></pre></div>
+<p>압축된 파일들의 용량은 다음과 같습니다.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">choonghyunryu@yuchunghyeon-ui-MacBookPro</span> ecoDI_meta % du <span class="at">-h</span> <span class="pp">*</span>.xz</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a> <span class="ex">24K</span>    mt_kosis_indctr.sql.tar.xz</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a> <span class="ex">28K</span>    mt_kosis_indexpl.sql.tar.xz</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4.0K</span>    mt_kosis_indlist.sql.tar.xz</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a> <span class="ex">80M</span>    mt_kosis_itm.sql.tar.xz</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a> <span class="ex">20K</span>    mt_kosis_org.sql.tar.xz</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ex">512K</span>    mt_kosis_prd.sql.tar.xz</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">4.0K</span>    mt_kosis_prdse.sql.tar.xz</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="ex">768K</span>    mt_kosis_src.sql.tar.xz</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="ex">3.1M</span>    mt_kosis_stat.sql.tar.xz</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="ex">960K</span>    mt_kosis_statexpl.sql.tar.xz</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ex">3.1M</span>    mt_kosis_tbl.sql.tar.xz</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="ex">8.1M</span>    mt_log_dataimp.sql.tar.xz</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a> <span class="ex">34M</span>    mt_log_manage.sql.tar.xz</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="ex">4.0K</span>    mt_schema_list.sql.tar.xz</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">choonghyunryu@yuchunghyeon-ui-MacBookPro</span> ecoDI_meta % </span></code></pre></div>
+<h3 id="export-파일-전송">export 파일 전송</h3>
+<p>export된 파일을 github 저장소에 올려 놓았습니다. 리소스의 백업과 버전 관리를 위해서입니다.</p>
+<p>다음 저장소에서 다운로드할 수 있습니다.</p>
+<ul>
+<li><a href="https://github.com/choonghyunryu/ecoDI_meta.git" class="uri">https://github.com/choonghyunryu/ecoDI_meta.git</a></li>
+</ul>
+<p>크롤링 서버에서 git 클론(clone)으로 다운로드합니다.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/choonghyunryu/ecoDI_meta.git</span></code></pre></div>
+<h3 id="파일-압축-풀기">파일 압축 풀기</h3>
+<p>다운로드한 <code>ecoDI_meta</code> 디렉토리로 이동하여, 다음 스크립트로 압축을 풉니다.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="va">flist</span><span class="op">=</span><span class="kw">`</span><span class="fu">ls</span> <span class="pp">*</span>.tar.xz<span class="kw">`</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> fname <span class="kw">in</span> <span class="va">$flist</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xz</span> <span class="at">-d</span> <span class="st">&quot;</span><span class="va">$fname</span><span class="st">&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tar</span> <span class="at">-xvf</span> <span class="st">&quot;</span><span class="va">${fname</span><span class="op">%</span>.xz<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Decompressed {</span><span class="va">$fname</span><span class="st">}&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<h3 id="마이그레이션-import">마이그레이션 import</h3>
+<p>압축을 푼 SQL 파일을 다음 스크립트로 마이그레이션합니다.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import dump file</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_indctr.sql</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_indexpl.sql</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_indlist.sql</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_itm.sql</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_org.sql</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_prd.sql</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_prdse.sql</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_src.sql</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_stat.sql</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_statexpl.sql</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_kosis_tbl.sql</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_log_dataimp.sql</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_log_manage.sql</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="ex">mysql</span> <span class="at">-h</span> localhost <span class="at">-uecodi</span> <span class="at">-p</span> ecodi_meta <span class="op">&lt;</span> mt_schema_list.sql</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
